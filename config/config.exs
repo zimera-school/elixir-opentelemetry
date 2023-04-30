@@ -7,15 +7,19 @@
 # General application configuration
 import Config
 
-config :demo,
-  ecto_repos: [Demo.Repo]
+config :hr_service,
+  ecto_repos: [HrService.Repo],
+  generators: [binary_id: true]
 
 # Configures the endpoint
-config :demo, DemoWeb.Endpoint,
+config :hr_service, HrServiceWeb.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: DemoWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: Demo.PubSub,
-  live_view: [signing_salt: "VAm4n+i4"]
+  render_errors: [
+    formats: [json: HrServiceWeb.ErrorJSON],
+    layout: false
+  ],
+  pubsub_server: HrService.PubSub,
+  live_view: [signing_salt: "GRiPanE8"]
 
 # Configures the mailer
 #
@@ -24,19 +28,28 @@ config :demo, DemoWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :demo, Demo.Mailer, adapter: Swoosh.Adapters.Local
-
-# Swoosh API client is needed for adapters other than SMTP.
-config :swoosh, :api_client, false
+config :hr_service, HrService.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,
-  version: "0.14.0",
+  version: "0.17.11",
   default: [
     args:
       ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+  ]
+
+# Configure tailwind (the version is required)
+config :tailwind,
+  version: "3.2.7",
+  default: [
+    args: ~w(
+      --config=tailwind.config.js
+      --input=css/app.css
+      --output=../priv/static/assets/app.css
+    ),
+    cd: Path.expand("../assets", __DIR__)
   ]
 
 # Configures Elixir's Logger
@@ -52,6 +65,9 @@ config :opentelemetry, :processors,
   otel_batch_processor: %{
     exporter: {:otel_exporter_stdout, []}
   }
+
+config :opentelemetry, :resource,
+  service: %{name: "hr-service", namespace: "zimera"}
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

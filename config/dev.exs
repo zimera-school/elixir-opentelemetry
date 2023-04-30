@@ -1,11 +1,13 @@
 import Config
 
 # Configure your database
-config :demo, Demo.Repo,
+config :hr_service, HrService.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "demo_dev",
+  database: "hr_service_dev",
+  port: "5432",
+  stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
@@ -15,17 +17,17 @@ config :demo, Demo.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with esbuild to bundle .js and .css sources.
-config :demo, DemoWeb.Endpoint,
+config :hr_service, HrServiceWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}, port: 4000],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "sCG0+TPbrMjXcTfqNb/y8OtflRYrWlqugOQev4l37ONaqnKUpB/lucwjYVJ7skz2",
+  secret_key_base: "Z1ux0iGoqEZ9Mt0pykjGPoYtSiALENNUXxs5Pe0TrFExwk20K5WgMJA2ZydoBdL2",
   watchers: [
-    # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
-    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
   ]
 
 # ## SSL Support
@@ -36,7 +38,6 @@ config :demo, DemoWeb.Endpoint,
 #
 #     mix phx.gen.cert
 #
-# Note that this task requires Erlang/OTP 20 or later.
 # Run `mix help phx.gen.cert` for more information.
 #
 # The `http:` config above can be replaced with:
@@ -52,16 +53,8 @@ config :demo, DemoWeb.Endpoint,
 # configured to run both http and https servers on
 # different ports.
 
-# Watch static and templates for browser reloading.
-config :demo, DemoWeb.Endpoint,
-  live_reload: [
-    patterns: [
-      ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"priv/gettext/.*(po)$",
-      ~r"lib/demo_web/(live|views)/.*(ex)$",
-      ~r"lib/demo_web/templates/.*(eex)$"
-    ]
-  ]
+# Enable dev routes for dashboard and mailbox
+config :hr_service, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
@@ -72,6 +65,9 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+# Disable swoosh api client as it is only required for production adapters.
+config :swoosh, :api_client, false
 
 config :opentelemetry,
        :processors,
